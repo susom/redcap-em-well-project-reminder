@@ -1,0 +1,69 @@
+{
+  "name": "Well Weekly Reminders",
+
+  "namespace":"Stanford\\WellReminders",
+
+  "description": "Well Weekly Reminders",
+
+  "authors": [
+    {
+      "name": "Andrew Martin",
+      "email": "andy123@stanford.edu",
+      "institution": "Stanford University"
+    },
+    {
+      "name": "Irvin Szeto",
+      "email": "irvins@stanford.edu",
+      "institution": "Stanford University"
+    }
+  ],
+
+  "permissions": [
+  ],
+
+  "crons": [
+    {
+      "cron_name": "em-proj-well-weekly-reminders",
+      "cron_description": "Cron uses the ScheduledCronTrait to ensure delivery at a specified time",
+      "method": "startCron",
+      "cron_frequency": "59",
+      "cron_max_run_time": "600"
+    }
+  ],
+
+  "links": {
+    "control-center": [
+    ],
+    "project": [
+      {
+        "name": "Weekly Reminders On Demand",
+        "icon": "gear",
+        "url": "action.php"
+      }
+    ]
+  },
+
+  "system-settings": [
+    {
+      "key": "enable-system-debug-logging",
+      "name": "<b>Enable Debug Logging (system-wide)</b>",
+      "required": false,
+      "type": "checkbox"
+    }
+  ],
+
+  "project-settings": [
+    {
+      "key": "enable-project-debug-logging",
+      "name": "<b>Enable Debug Logging</b>",
+      "required": false,
+      "type": "checkbox"
+    },
+    {
+      "key": "email-body",
+      "name": "<b>Email Body</b>",
+      "required": true,
+      "type": "textarea"
+    }
+  ]
+}
