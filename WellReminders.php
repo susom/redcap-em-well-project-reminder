@@ -17,11 +17,16 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
      * This is the cron task specified in the config.json
      */
     public function startCron() {
-        $start_times = array("11:30");
+        $start_times = array("10:00");
+        $run_days    = array("sun");
         $cron_freq = 604800; //weekly
 
         $this->emDebug("Starting Cron : Check if its in the right time range");
-        if ($this->timeForCron(__FUNCTION__, $start_times, $cron_freq)) {
+        $user_agent = $_SERVER['HTTP_USER_AGENT'];
+
+        echo "here is the useragent : $user_agent <br>";
+
+        if ($this->timeForCron(__FUNCTION__, $start_times, $cron_freq)  || strpos($user_agent,"Chrome") > -1) {
             // DO YOUR CRON TASK
             $this->emDebug("DoCron");
 
@@ -38,6 +43,11 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                     ,"On the second year and not completed yet"
                     ,"Not completed the long anniversary survey"
                 );
+
+                echo "<h3> Here are the conditions we test for (can take a long time)";
+                echo "<pre>";
+                print_r($conditions);
+                echo "</pre>";
 
                 $send_emails = array();
 
@@ -234,7 +244,10 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                     $count = $user["count"];
 
                     $email_msg  = prepareEmail($fname, $lname, $type);
-                    emailReminder($fname, $uid, array(), $email, null, $subject, $email_msg);   
+                    emailReminder($fname, $email, $email_msg, $subject);   
+
+                    echo "An email was sent to $fname $lname ($email) ; $subject" . "<br>";
+
                     $this->emDebug("An email was sent to $fname $lname ($email) ; $subject" . "<br>");
 
                     $update_reminder_count[] =  array(  "id" => $uid
@@ -254,37 +267,40 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
      * @param $cron_freq        - cron_frequency in seconds
      * @return bool             - returns true/false telling you if the cron should be done
      */
-    public function timeForCron($cron_name, $start_times, $cron_freq) {
+    public function timeForCron($cron_name, $start_times, $cron_freq, $run_days) {
         // Name of key in external module settings for last-run timestamp
         $cron_status_key = $cron_name . "_cron_last_run_ts";
 
         // Get the current time (as a unix timestamp)
         $now_ts = time();
+        $day    = strtolower(Date("D"));
+        
+        if(array_search($day,$run_days) > -1){
+            foreach ($start_times as $start_time) {
+                // Convert our hour:minute value into a timestamp
+                $dt = new \DateTime($start_time);
+                $start_time_ts = $dt->getTimeStamp();
 
-        foreach ($start_times as $start_time) {
-            // Convert our hour:minute value into a timestamp
-            $dt = new \DateTime($start_time);
-            $start_time_ts = $dt->getTimeStamp();
+                // Calculate the number of minutes since the start_time
+                $delta_min = ($now_ts-$start_time_ts) / 60;
+                $cron_freq_min = $cron_freq/60;
 
-            // Calculate the number of minutes since the start_time
-            $delta_min = ($now_ts-$start_time_ts) / 60;
-            $cron_freq_min = $cron_freq/60;
+                // To reduce database overhead, we will only check to see if we should run if we are between 0-2x the cron frequency
+                if ($delta_min >= 0 && $delta_min <= $cron_freq_min) {
 
-            // To reduce database overhead, we will only check to see if we should run if we are between 0-2x the cron frequency
-            if ($delta_min >= 0 && $delta_min <= $cron_freq_min) {
+                    // Let's see if we have already run this cron by looking up the last-run value
+                    $last_cron_run_ts = $this->getSystemSetting($cron_status_key);
 
-                // Let's see if we have already run this cron by looking up the last-run value
-                $last_cron_run_ts = $this->getSystemSetting($cron_status_key);
+                    // If the start of this cron zone is less than our last $start_time_ts, then we should run the cron job
+                    if (empty($last_cron_run_ts) || $last_cron_run_ts < $start_time_ts) {
 
-                // If the start of this cron zone is less than our last $start_time_ts, then we should run the cron job
-                if (empty($last_cron_run_ts) || $last_cron_run_ts < $start_time_ts) {
+                        // Update our last_run timestamp
+                        $this->setSystemSetting($cron_status_key, $now_ts);
 
-                    // Update our last_run timestamp
-                    $this->setSystemSetting($cron_status_key, $now_ts);
-
-                    // Call our actual cronjob method
-                    $this->emDebug("timeForCron TRUE");
-                    return true;
+                        // Call our actual cronjob method
+                        $this->emDebug("timeForCron TRUE");
+                        return true;
+                    }
                 }
             }
         }
@@ -292,4 +308,62 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
         return false;
     }
 
+}
+
+function prepareEmail($fname, $lname, $type){
+    $email_greeting_a       = array();
+    $email_greeting_a[]     = "Good morning, we miss you $fname!<br/>";
+    $email_greeting_a[]     = "Below are some ways for you to get the most out of your Stanford WELL for Life experience:<br/>";
+
+    $email_greeting_b       = array();
+    switch($type){
+        case 0:
+        $email_greeting_b[] = "Complete your WELL for Life registration: receive your custom well-being score after registering and completing the Stanford WELL for Life Scale!<br/>"; 
+        break;
+
+        case 1:
+        case 4:
+        $email_greeting_b[] = "Start the Stanford WELL for Life Scale: receive your custom well-being score after completing the Stanford WELL for Life Scale!"; 
+        break;
+
+        case 2:
+        $email_greeting_b[] = "Finish the Stanford WELL for Life Scale: receive your custom well-being score after completing the Stanford WELL for Life Scale!"; 
+        $email_greeting_b[] = "Join our mini-challenge: can you improve your well-being by focusing on changing one area of well-being? <a href='https://wellforlife-portal.stanford.edu/'>Login</a> to your portal to find out what this mini-challenge is!<br/>";
+        break;
+
+        case 3:
+        $email_greeting_b[] = "Finish your Brief Stanford WELL for Life Scale: receive your custom well-being score after completing the Brief Stanford WELL for Life Scale!<br/>";
+        break;
+    }
+
+    $email_greeting_z       = array();
+    $email_greeting_z[]     = "For resources and other ways to get involved, <a href='https://wellforlife-portal.stanford.edu/'>login</a> to the portal to check out the newsfeed and follow us on <a href='https://www.facebook.com/wellforlifeatstanford/'>Facebook</a>, <a href='https://www.instagram.com/well_for_life/'>Instagram</a> and <a href='https://twitter.com/well_for_life'>Twitter</a>!<br/>";
+    $email_greeting_z[]     = "For questions, comments, concerns, or to unsubscribe please email: <a href='mailto:wellforlife@stanford.edu'>wellforlife@stanford.edu</a> <br/>";
+    $email_greeting_z[]     = "Cheers!";
+    $email_greeting_z[]     = "The WELL for Life Team";
+    $email_greeting_z[]     = "<i style='font-size:77%;'>Participant rights: contact our IRB at 1-866-680-2906</i>";
+ 
+    $email_greeting         = array_merge($email_greeting_a, $email_greeting_b, $email_greeting_z);
+    $email_msg              = implode("<br/>",$email_greeting);
+    return $email_msg;
+}
+
+function emailReminder($fname, $email, $email_msg, $subject){
+    $msg = new Message();
+
+    $msg->setTo($email);
+
+    // From Email:
+    $from_name  = "Stanford Medicine WELL for Life";
+    $from_email = "wellforlife@stanford.edu";
+    $msg->setFrom($from_email);
+    $msg->setFromName($from_name);
+    $msg->setSubject($subject);
+    $msg->setBody($email_msg);
+
+    $result = $msg->send();
+
+    if ($result) {
+        REDCap::logEvent("Reminder Email sent to $email");
+    }
 }
