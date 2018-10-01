@@ -24,10 +24,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
         $user_agent = $_SERVER['HTTP_USER_AGENT'];
 
         echo "here is the useragent : $user_agent <br>";
-        emailReminder("irvin", "irvins@stanford.edu", "hardcoded test message", "test subject");
-        emailReminder("katy", "katypeng@stanford.edu", "hardcoded test message", "test subject");
-        return;
-        
+
         if ($this->timeForCron(__FUNCTION__, $start_times, $cron_freq)  || strpos($user_agent,"Chrome") > -1) {
             // DO YOUR CRON TASK
             $this->emDebug("DoCron");
@@ -249,7 +246,6 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                     emailReminder($fname, $email, $email_msg, $subject);   
 
                     echo "An email was sent to $fname $lname ($email) ; $subject" . "<br>";
-
                     $this->emDebug("An email was sent to $fname $lname ($email) ; $subject" . "<br>");
 
                     $update_reminder_count[] =  array(  "id" => $uid
