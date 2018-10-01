@@ -43,7 +43,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                     ,"Not completed the long anniversary survey"
                 );
 
-                echo "<h3> Here are the conditions we test for (can take a long time)";
+                echo "<h3> Here are the conditions we test for (can take a long time)</h3>";
                 echo "<pre>";
                 print_r($conditions);
                 echo "</pre>";
@@ -69,7 +69,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                             AND [user_test_data] != 1
                                                             AND [email_reminders_count] < 3'
                                                             , true, true ); 
-                echo "consented_no_pw : $consented_no_pw<br>";
+                echo "consented_no_pw : ".count($consented_no_pw)."<br>";
 
                 foreach($consented_no_pw as $user){
                     $user               = array_shift($user);
@@ -105,7 +105,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                             AND [user_test_data] != 1
                                                             AND [email_reminders_count] < 3'
                                                             , true, true ); 
-                echo "consented_pw_notstart : $consented_pw_notstart<br>";
+                echo "consented_pw_notstart : ".count($consented_pw_notstart)."<br>";
 
                 foreach($consented_pw_notstart as $user){
                     $user               = array_shift($user);
@@ -141,7 +141,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                             AND [user_test_data] != 1
                                                             AND [email_reminders_count] < 3'
                                                             , true, true ); 
-                echo "surveystart_nofinish : $surveystart_nofinish<br>";
+                echo "surveystart_nofinish : ".count($surveystart_nofinish)."<br>";
 
                 foreach($surveystart_nofinish as $user){
                     $user               = array_shift($user);
@@ -180,7 +180,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                             AND [enrollment_arm_1][user_test_data] != 1
                                                             AND [enrollment_arm_1][email_reminders_count] < 3'
                                                             , true, true ); 
-                echo "brief_reminder : $brief_reminder<br>";
+                echo "brief_reminder : ".count($brief_reminder)."<br>";
 
                 foreach($brief_reminder as $user){
                     $user               = array_shift($user);
@@ -218,7 +218,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                             AND [enrollment_arm_1][user_test_data] != 1
                                                             AND [enrollment_arm_1][email_reminders_count] < 3'
                                                             , true, true ); 
-                echo "secondlong : $secondlong<br>";
+                echo "secondlong : ".count($secondlong)."<br>";
 
                 foreach($secondlong as $user){
                     $user               = array_shift($user);
