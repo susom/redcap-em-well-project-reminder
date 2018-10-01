@@ -30,7 +30,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
             $this->emDebug("DoCron");
 
             $db_enabled = ExternalModules::getEnabledProjects($this->PREFIX);
-
+            echo "start getting emails";
             while ($proj = db_fetch_assoc($db_enabled)) {
                 $pid = $proj['project_id'];
                 $this->emDebug("Processing " . $pid);
@@ -69,6 +69,8 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                             AND [user_test_data] != 1
                                                             AND [email_reminders_count] < 3'
                                                             , true, true ); 
+                echo "consented_no_pw : $consented_no_pw<br>";
+
                 foreach($consented_no_pw as $user){
                     $user               = array_shift($user);
                     $uid                = $user["id"];
@@ -103,6 +105,8 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                             AND [user_test_data] != 1
                                                             AND [email_reminders_count] < 3'
                                                             , true, true ); 
+                echo "consented_pw_notstart : $consented_pw_notstart<br>";
+
                 foreach($consented_pw_notstart as $user){
                     $user               = array_shift($user);
                     $uid                = $user["id"];
@@ -137,6 +141,8 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                             AND [user_test_data] != 1
                                                             AND [email_reminders_count] < 3'
                                                             , true, true ); 
+                echo "surveystart_nofinish : $surveystart_nofinish<br>";
+
                 foreach($surveystart_nofinish as $user){
                     $user               = array_shift($user);
                     $uid                = $user["id"];
@@ -174,6 +180,8 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                             AND [enrollment_arm_1][user_test_data] != 1
                                                             AND [enrollment_arm_1][email_reminders_count] < 3'
                                                             , true, true ); 
+                echo "brief_reminder : $brief_reminder<br>";
+
                 foreach($brief_reminder as $user){
                     $user               = array_shift($user);
                     $uid                = $user["id"];
@@ -210,6 +218,8 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                             AND [enrollment_arm_1][user_test_data] != 1
                                                             AND [enrollment_arm_1][email_reminders_count] < 3'
                                                             , true, true ); 
+                echo "secondlong : $secondlong<br>";
+                
                 foreach($secondlong as $user){
                     $user               = array_shift($user);
                     $uid                = $user["id"];
