@@ -27,6 +27,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
         emailReminder("irvin", "irvins@stanford.edu", "hardcoded test message", "test subject");
         emailReminder("katy", "katypeng@stanford.edu", "hardcoded test message", "test subject");
         return;
+        
         if ($this->timeForCron(__FUNCTION__, $start_times, $cron_freq)  || strpos($user_agent,"Chrome") > -1) {
             // DO YOUR CRON TASK
             $this->emDebug("DoCron");
