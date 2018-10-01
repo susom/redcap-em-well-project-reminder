@@ -18,7 +18,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
     public function startCron() {
         $start_times = array("10:00");
         $run_days    = array("sun");
-        $cron_freq = 604800; //weekly
+        $cron_freq = 3600; //weekly
 
         $this->emDebug("Starting Cron : Check if its in the right time range");
         $user_agent = $_SERVER['HTTP_USER_AGENT'];
@@ -219,7 +219,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                             AND [enrollment_arm_1][email_reminders_count] < 3'
                                                             , true, true ); 
                 echo "secondlong : $secondlong<br>";
-                
+
                 foreach($secondlong as $user){
                     $user               = array_shift($user);
                     $uid                = $user["id"];
