@@ -3,11 +3,10 @@ namespace Stanford\WellReminders;
 
 // Load trait
 require_once "emLoggerTrait.php";
-require_once "class.mail.php";
 
 use ExternalModules\ExternalModules;
 use REDCap;
-
+use Message;
 
 class WellReminders extends \ExternalModules\AbstractExternalModule
 {
@@ -25,7 +24,9 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
         $user_agent = $_SERVER['HTTP_USER_AGENT'];
 
         echo "here is the useragent : $user_agent <br>";
-
+        emailReminder("irvin", "irvins@stanford.edu", "hardcoded test message", "test subject");
+        emailReminder("katy", "katypeng@stanford.edu", "hardcoded test message", "test subject");
+        return;
         if ($this->timeForCron(__FUNCTION__, $start_times, $cron_freq)  || strpos($user_agent,"Chrome") > -1) {
             // DO YOUR CRON TASK
             $this->emDebug("DoCron");
