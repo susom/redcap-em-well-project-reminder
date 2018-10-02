@@ -16,7 +16,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
      * This is the cron task specified in the config.json
      */
     public function startCron() {
-        $start_times = array("10:00");
+        $start_times = array("11:30");
         $run_days    = array("sun");
         $cron_freq = 3600; //weekly
 
@@ -31,8 +31,9 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
 
             $db_enabled = ExternalModules::getEnabledProjects($this->PREFIX);
             echo "start getting emails";
+
             while ($proj = db_fetch_assoc($db_enabled)) {
-                $pid = $proj['project_id'];
+                $pid = $proj_id = $project_id = $proj['project_id'];
                 $this->emDebug("Processing " . $pid);
 
                 $conditions = array(
@@ -54,7 +55,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                 // we know they clicked on the link in their email
                 // we know they have not set up password
                 // we are just assuming they clicked on the 'i consent/agree' button
-                $consented_no_pw = REDCap::getData('array', null, array('id'
+                $consented_no_pw = REDCap::getData($pid,'array', null, array('id'
                                                             ,'portal_consent_ts' //filled out security questions
                                                             ,'portal_email_verified_ts'
                                                             ,'portal_firstname'
@@ -88,7 +89,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                 }
 
                 //√ CONSENTED BUT NOT STARTED
-                $consented_pw_notstart = REDCap::getData('array', null, array('id'
+                $consented_pw_notstart = REDCap::getData($pid,'array', null, array('id'
                                                             ,'portal_consent_ts' //filled out security questions
                                                             ,'portal_email_verified_ts'
                                                             ,'portal_firstname'
@@ -125,7 +126,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                 }
 
                 //√ STARTED BUT NOT COMPLETE
-                $surveystart_nofinish = REDCap::getData('array', null, array('id'
+                $surveystart_nofinish = REDCap::getData($pid,'array', null, array('id'
                                                             ,'portal_consent_ts' //filled out security questions
                                                             ,'portal_email_verified_ts'
                                                             ,'portal_firstname'
@@ -164,7 +165,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                 //use well_score because short survey is in different project
                 $anniversary_end    = date('Y-m-d', strtotime('-1 years'));
                 $anniversary_start  = date('Y-m-d', strtotime('-2 years'));
-                $brief_reminder     = REDCap::getData('array', null, array('id'
+                $brief_reminder     = REDCap::getData($pid,'array', null, array('id'
                                                             ,'portal_consent_ts' //clicked on consent  + filled out password security qs
                                                             ,'portal_firstname'
                                                             ,'portal_lastname'
@@ -202,7 +203,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                 //√ THIRD ANNIVERSARY , NOT STARTED
                 $anniversary_end    = date('Y-m-d', strtotime('-2 years'));
                 $anniversary_start  = date('Y-m-d', strtotime('-3 years'));
-                $secondlong         = REDCap::getData('array', null, array('id'
+                $secondlong         = REDCap::getData($pid,'array', null, array('id'
                                                             ,'portal_consent_ts' //clicked on consent  + filled out password security qs
                                                             ,'portal_firstname'
                                                             ,'portal_lastname'
@@ -263,7 +264,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                 );
                 }
                 $json_data      = json_encode($update_reminder_count);
-                $response       = REDCap::saveData('json', $json_data, 'overwrite');
+                $response       = REDCap::saveData($pid, 'json', $json_data, 'overwrite');
             }
         }
     }
