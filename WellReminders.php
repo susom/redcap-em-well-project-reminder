@@ -137,13 +137,13 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                             , null, false, true, false
                                                             , '[portal_consent_ts] != "" 
                                                             AND [core_fitness_level] != "" 
-                                                            AND [core_feedback] = "" 
+                                                            AND [your_feedback_complete] != 2 
                                                             AND [portal_unsubscribe] != 1 
                                                             AND [user_test_data] != 1
                                                             AND [email_reminders_count] < 3'
                                                             , true, true ); 
                 echo "surveystart_nofinish : ".count($surveystart_nofinish)."<br>";
-
+exit;
                 foreach($surveystart_nofinish as $user){
                     $user               = array_shift($user);
                     $uid                = $user["id"];
