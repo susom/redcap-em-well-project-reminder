@@ -71,7 +71,6 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                             AND [email_reminders_count] < 3'
                                                             , true, true ); 
                 echo "consented_no_pw : ".count($consented_no_pw)."<br>";
-
                 foreach($consented_no_pw as $user){
                     $user               = array_shift($user);
                     $uid                = $user["id"];
@@ -88,42 +87,40 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                         );
                 }
 
-                // //√ CONSENTED BUT NOT STARTED
-                // $consented_pw_notstart = REDCap::getData($pid,'array', null, array('id'
-                //                                             ,'portal_consent_ts' //filled out security questions
-                //                                             ,'portal_email_verified_ts'
-                //                                             ,'portal_firstname'
-                //                                             ,'portal_lastname'
-                //                                             ,'portal_email'
-                //                                             ,'email_reminders_count'
-                //                                             ), array('enrollment_arm_1')
-                //                                             , null, false, true, false
-                //                                             , '[portal_consent_ts] != "" 
-                //                                             AND [core_fitness_level] = "" 
-                //                                             AND [core_physical_illness] = "" 
-                //                                             AND [core_feedback] = "" 
-                //                                             AND [portal_unsubscribe] != 1 
-                //                                             AND [user_test_data] != 1
-                //                                             AND [email_reminders_count] < 3'
-                //                                             , true, true ); 
-                // echo "consented_pw_notstart : ".count($consented_pw_notstart)."<br>";
+                //√ CONSENTED BUT NOT STARTED
+                $consented_pw_notstart = REDCap::getData($pid,'array', null, array('id'
+                                                            ,'portal_consent_ts' //filled out security questions
+                                                            ,'portal_email_verified_ts'
+                                                            ,'portal_firstname'
+                                                            ,'portal_lastname'
+                                                            ,'portal_email'
+                                                            ,'email_reminders_count'
+                                                            ), array('enrollment_arm_1')
+                                                            , null, false, true, false
+                                                            , '[portal_consent_ts] != "" 
+                                                            AND [core_fitness_level] = "" 
+                                                            AND [core_physical_illness] = "" 
+                                                            AND [portal_unsubscribe] != 1 
+                                                            AND [user_test_data] != 1
+                                                            AND [email_reminders_count] < 3'
+                                                            , true, true ); 
+                echo "consented_pw_notstart : ".count($consented_pw_notstart)."<br>";
+                foreach($consented_pw_notstart as $user){
+                    $user               = array_shift($user);
+                    $uid                = $user["id"];
+                    $fname              = ucfirst($user["portal_firstname"]);
+                    $lname              = ucfirst($user["portal_lastname"]);
+                    $email              = $user["portal_email"];
+                    $count              = $user["email_reminders_count"];
 
-                // foreach($consented_pw_notstart as $user){
-                //     $user               = array_shift($user);
-                //     $uid                = $user["id"];
-                //     $fname              = ucfirst($user["portal_firstname"]);
-                //     $lname              = ucfirst($user["portal_lastname"]);
-                //     $email              = $user["portal_email"];
-                //     $count              = $user["email_reminders_count"];
-
-                //     $send_emails[$uid]  = array(
-                //                              "fname"    => $fname
-                //                             ,"lname"    => $lname
-                //                             ,"email"    => $email
-                //                             ,"count"    => $count
-                //                             ,"type"     => 1 
-                //                         );
-                // }
+                    $send_emails[$uid]  = array(
+                                             "fname"    => $fname
+                                            ,"lname"    => $lname
+                                            ,"email"    => $email
+                                            ,"count"    => $count
+                                            ,"type"     => 1 
+                                        );
+                }
 
                 // //√ STARTED BUT NOT COMPLETE
                 // $surveystart_nofinish = REDCap::getData($pid,'array', null, array('id'
@@ -143,7 +140,6 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                 //                                             AND [email_reminders_count] < 3'
                 //                                             , true, true ); 
                 // echo "surveystart_nofinish : ".count($surveystart_nofinish)."<br>";
-
                 // foreach($surveystart_nofinish as $user){
                 //     $user               = array_shift($user);
                 //     $uid                = $user["id"];
