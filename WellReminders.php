@@ -62,7 +62,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                             ,'portal_lastname'
                                                             ,'portal_email'
                                                             ,'email_reminders_count'
-                                                            ), null
+                                                            ), array('enrollment_arm_1')
                                                             , null, false, true, false
                                                             , '[portal_consent_ts] = "" 
                                                             AND [portal_email_verified_ts] != "" 
@@ -88,155 +88,155 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                         );
                 }
 
-                //√ CONSENTED BUT NOT STARTED
-                $consented_pw_notstart = REDCap::getData($pid,'array', null, array('id'
-                                                            ,'portal_consent_ts' //filled out security questions
-                                                            ,'portal_email_verified_ts'
-                                                            ,'portal_firstname'
-                                                            ,'portal_lastname'
-                                                            ,'portal_email'
-                                                            ,'email_reminders_count'
-                                                            ), array('enrollment_arm_1')
-                                                            , null, false, true, false
-                                                            , '[portal_consent_ts] != "" 
-                                                            AND [core_fitness_level] = "" 
-                                                            AND [core_physical_illness] = "" 
-                                                            AND [core_feedback] = "" 
-                                                            AND [portal_unsubscribe] != 1 
-                                                            AND [user_test_data] != 1
-                                                            AND [email_reminders_count] < 3'
-                                                            , true, true ); 
-                echo "consented_pw_notstart : ".count($consented_pw_notstart)."<br>";
+                // //√ CONSENTED BUT NOT STARTED
+                // $consented_pw_notstart = REDCap::getData($pid,'array', null, array('id'
+                //                                             ,'portal_consent_ts' //filled out security questions
+                //                                             ,'portal_email_verified_ts'
+                //                                             ,'portal_firstname'
+                //                                             ,'portal_lastname'
+                //                                             ,'portal_email'
+                //                                             ,'email_reminders_count'
+                //                                             ), array('enrollment_arm_1')
+                //                                             , null, false, true, false
+                //                                             , '[portal_consent_ts] != "" 
+                //                                             AND [core_fitness_level] = "" 
+                //                                             AND [core_physical_illness] = "" 
+                //                                             AND [core_feedback] = "" 
+                //                                             AND [portal_unsubscribe] != 1 
+                //                                             AND [user_test_data] != 1
+                //                                             AND [email_reminders_count] < 3'
+                //                                             , true, true ); 
+                // echo "consented_pw_notstart : ".count($consented_pw_notstart)."<br>";
 
-                foreach($consented_pw_notstart as $user){
-                    $user               = array_shift($user);
-                    $uid                = $user["id"];
-                    $fname              = ucfirst($user["portal_firstname"]);
-                    $lname              = ucfirst($user["portal_lastname"]);
-                    $email              = $user["portal_email"];
-                    $count              = $user["email_reminders_count"];
+                // foreach($consented_pw_notstart as $user){
+                //     $user               = array_shift($user);
+                //     $uid                = $user["id"];
+                //     $fname              = ucfirst($user["portal_firstname"]);
+                //     $lname              = ucfirst($user["portal_lastname"]);
+                //     $email              = $user["portal_email"];
+                //     $count              = $user["email_reminders_count"];
 
-                    $send_emails[$uid]  = array(
-                                             "fname"    => $fname
-                                            ,"lname"    => $lname
-                                            ,"email"    => $email
-                                            ,"count"    => $count
-                                            ,"type"     => 1 
-                                        );
-                }
+                //     $send_emails[$uid]  = array(
+                //                              "fname"    => $fname
+                //                             ,"lname"    => $lname
+                //                             ,"email"    => $email
+                //                             ,"count"    => $count
+                //                             ,"type"     => 1 
+                //                         );
+                // }
 
-                //√ STARTED BUT NOT COMPLETE
-                $surveystart_nofinish = REDCap::getData($pid,'array', null, array('id'
-                                                            ,'portal_consent_ts' //filled out security questions
-                                                            ,'portal_email_verified_ts'
-                                                            ,'portal_firstname'
-                                                            ,'portal_lastname'
-                                                            ,'portal_email'
-                                                            ,'email_reminders_count'
-                                                            ), array('enrollment_arm_1')
-                                                            , null, false, true, false
-                                                            , '[portal_consent_ts] != "" 
-                                                            AND [core_fitness_level] != "" 
-                                                            AND [your_feedback_complete] != 2 
-                                                            AND [portal_unsubscribe] != 1 
-                                                            AND [user_test_data] != 1
-                                                            AND [email_reminders_count] < 3'
-                                                            , true, true ); 
-                echo "surveystart_nofinish : ".count($surveystart_nofinish)."<br>";
-exit;
-                foreach($surveystart_nofinish as $user){
-                    $user               = array_shift($user);
-                    $uid                = $user["id"];
-                    $fname              = ucfirst($user["portal_firstname"]);
-                    $lname              = ucfirst($user["portal_lastname"]);
-                    $email              = $user["portal_email"];
-                    $count              = $user["email_reminders_count"];
+                // //√ STARTED BUT NOT COMPLETE
+                // $surveystart_nofinish = REDCap::getData($pid,'array', null, array('id'
+                //                                             ,'portal_consent_ts' //filled out security questions
+                //                                             ,'portal_email_verified_ts'
+                //                                             ,'portal_firstname'
+                //                                             ,'portal_lastname'
+                //                                             ,'portal_email'
+                //                                             ,'email_reminders_count'
+                //                                             ), array('enrollment_arm_1')
+                //                                             , null, false, true, false
+                //                                             , '[portal_consent_ts] != "" 
+                //                                             AND [core_fitness_level] != "" 
+                //                                             AND [your_feedback_complete] != 2 
+                //                                             AND [portal_unsubscribe] != 1 
+                //                                             AND [user_test_data] != 1
+                //                                             AND [email_reminders_count] < 3'
+                //                                             , true, true ); 
+                // echo "surveystart_nofinish : ".count($surveystart_nofinish)."<br>";
 
-                    $send_emails[$uid]  = array(
-                                             "fname"    => $fname
-                                            ,"lname"    => $lname
-                                            ,"email"    => $email
-                                            ,"count"    => $count
-                                            ,"type"     => 2 
-                                        );
-                }
+                // foreach($surveystart_nofinish as $user){
+                //     $user               = array_shift($user);
+                //     $uid                = $user["id"];
+                //     $fname              = ucfirst($user["portal_firstname"]);
+                //     $lname              = ucfirst($user["portal_lastname"]);
+                //     $email              = $user["portal_email"];
+                //     $count              = $user["email_reminders_count"];
 
-                //√ SECOND YEAR, BUT BRIEF NOT STARTED COMPLETED
-                //use well_score because short survey is in different project
-                $anniversary_end    = date('Y-m-d', strtotime('-1 years'));
-                $anniversary_start  = date('Y-m-d', strtotime('-2 years'));
-                $brief_reminder     = REDCap::getData($pid,'array', null, array('id'
-                                                            ,'portal_consent_ts' //clicked on consent  + filled out password security qs
-                                                            ,'portal_firstname'
-                                                            ,'portal_lastname'
-                                                            ,'portal_email'
-                                                            ,'email_reminders_count'
-                                                            ,'well_score'
-                                                            ), array('enrollment_arm_1', 'short_anniversary_arm_1')
-                                                            , null, false, true, false
-                                                            , '[enrollment_arm_1][portal_consent_ts] >= "' . $anniversary_start . '" 
-                                                            AND [enrollment_arm_1][portal_consent_ts] < "' . $anniversary_end . '" 
-                                                            AND [short_anniversary_arm_1][well_score] = "" 
-                                                            AND [enrollment_arm_1][portal_unsubscribe] != 1 
-                                                            AND [enrollment_arm_1][user_test_data] != 1
-                                                            AND [enrollment_arm_1][email_reminders_count] < 3'
-                                                            , true, true ); 
-                echo "brief_reminder : ".count($brief_reminder)."<br>";
+                //     $send_emails[$uid]  = array(
+                //                              "fname"    => $fname
+                //                             ,"lname"    => $lname
+                //                             ,"email"    => $email
+                //                             ,"count"    => $count
+                //                             ,"type"     => 2 
+                //                         );
+                // }
 
-                foreach($brief_reminder as $user){
-                    $user               = array_shift($user);
-                    $uid                = $user["id"];
-                    $fname              = ucfirst($user["portal_firstname"]);
-                    $lname              = ucfirst($user["portal_lastname"]);
-                    $email              = $user["portal_email"];
-                    $count              = $user["email_reminders_count"];
+                // //√ SECOND YEAR, BUT BRIEF NOT STARTED COMPLETED
+                // //use well_score because short survey is in different project
+                // $anniversary_end    = date('Y-m-d', strtotime('-1 years'));
+                // $anniversary_start  = date('Y-m-d', strtotime('-2 years'));
+                // $brief_reminder     = REDCap::getData($pid,'array', null, array('id'
+                //                                             ,'portal_consent_ts' //clicked on consent  + filled out password security qs
+                //                                             ,'portal_firstname'
+                //                                             ,'portal_lastname'
+                //                                             ,'portal_email'
+                //                                             ,'email_reminders_count'
+                //                                             ,'well_score'
+                //                                             ), array('enrollment_arm_1', 'short_anniversary_arm_1')
+                //                                             , null, false, true, false
+                //                                             , '[enrollment_arm_1][portal_consent_ts] >= "' . $anniversary_start . '" 
+                //                                             AND [enrollment_arm_1][portal_consent_ts] < "' . $anniversary_end . '" 
+                //                                             AND [short_anniversary_arm_1][well_score] = "" 
+                //                                             AND [enrollment_arm_1][portal_unsubscribe] != 1 
+                //                                             AND [enrollment_arm_1][user_test_data] != 1
+                //                                             AND [enrollment_arm_1][email_reminders_count] < 3'
+                //                                             , true, true ); 
+                // echo "brief_reminder : ".count($brief_reminder)."<br>";
 
-                    $send_emails[$uid]  = array(
-                                             "fname"    => $fname
-                                            ,"lname"    => $lname
-                                            ,"email"    => $email
-                                            ,"count"    => $count
-                                            ,"type"     => 3 
-                                        );
-                }
+                // foreach($brief_reminder as $user){
+                //     $user               = array_shift($user);
+                //     $uid                = $user["id"];
+                //     $fname              = ucfirst($user["portal_firstname"]);
+                //     $lname              = ucfirst($user["portal_lastname"]);
+                //     $email              = $user["portal_email"];
+                //     $count              = $user["email_reminders_count"];
 
-                //√ THIRD ANNIVERSARY , NOT STARTED
-                $anniversary_end    = date('Y-m-d', strtotime('-2 years'));
-                $anniversary_start  = date('Y-m-d', strtotime('-3 years'));
-                $secondlong         = REDCap::getData($pid,'array', null, array('id'
-                                                            ,'portal_consent_ts' //clicked on consent  + filled out password security qs
-                                                            ,'portal_firstname'
-                                                            ,'portal_lastname'
-                                                            ,'portal_email'
-                                                            ,'email_reminders_count'
-                                                            ,'well_score'
-                                                            ), array('enrollment_arm_1', 'anniversary_2_arm_1')
-                                                            , null, false, true, false
-                                                            , '[enrollment_arm_1][portal_consent_ts] >= "' . $anniversary_start . '" 
-                                                            AND [enrollment_arm_1][portal_consent_ts] < "' . $anniversary_end . '" 
-                                                            AND [anniversary_2_arm_1][core_feedback] = "" 
-                                                            AND [enrollment_arm_1][portal_unsubscribe] != 1 
-                                                            AND [enrollment_arm_1][user_test_data] != 1
-                                                            AND [enrollment_arm_1][email_reminders_count] < 3'
-                                                            , true, true ); 
-                echo "secondlong : ".count($secondlong)."<br>";
+                //     $send_emails[$uid]  = array(
+                //                              "fname"    => $fname
+                //                             ,"lname"    => $lname
+                //                             ,"email"    => $email
+                //                             ,"count"    => $count
+                //                             ,"type"     => 3 
+                //                         );
+                // }
 
-                foreach($secondlong as $user){
-                    $user               = array_shift($user);
-                    $uid                = $user["id"];
-                    $fname              = ucfirst($user["portal_firstname"]);
-                    $lname              = ucfirst($user["portal_lastname"]);
-                    $email              = $user["portal_email"];
-                    $count              = $user["email_reminders_count"];
+                // //√ THIRD ANNIVERSARY , NOT STARTED
+                // $anniversary_end    = date('Y-m-d', strtotime('-2 years'));
+                // $anniversary_start  = date('Y-m-d', strtotime('-3 years'));
+                // $secondlong         = REDCap::getData($pid,'array', null, array('id'
+                //                                             ,'portal_consent_ts' //clicked on consent  + filled out password security qs
+                //                                             ,'portal_firstname'
+                //                                             ,'portal_lastname'
+                //                                             ,'portal_email'
+                //                                             ,'email_reminders_count'
+                //                                             ,'well_score'
+                //                                             ), array('enrollment_arm_1', 'anniversary_2_arm_1')
+                //                                             , null, false, true, false
+                //                                             , '[enrollment_arm_1][portal_consent_ts] >= "' . $anniversary_start . '" 
+                //                                             AND [enrollment_arm_1][portal_consent_ts] < "' . $anniversary_end . '" 
+                //                                             AND [anniversary_2_arm_1][core_feedback] = "" 
+                //                                             AND [enrollment_arm_1][portal_unsubscribe] != 1 
+                //                                             AND [enrollment_arm_1][user_test_data] != 1
+                //                                             AND [enrollment_arm_1][email_reminders_count] < 3'
+                //                                             , true, true ); 
+                // echo "secondlong : ".count($secondlong)."<br>";
 
-                    $send_emails[$uid]  = array(
-                                             "fname"    => $fname
-                                            ,"lname"    => $lname
-                                            ,"email"    => $email
-                                            ,"count"    => $count
-                                            ,"type"     => 4 
-                                        );
-                }
+                // foreach($secondlong as $user){
+                //     $user               = array_shift($user);
+                //     $uid                = $user["id"];
+                //     $fname              = ucfirst($user["portal_firstname"]);
+                //     $lname              = ucfirst($user["portal_lastname"]);
+                //     $email              = $user["portal_email"];
+                //     $count              = $user["email_reminders_count"];
+
+                //     $send_emails[$uid]  = array(
+                //                              "fname"    => $fname
+                //                             ,"lname"    => $lname
+                //                             ,"email"    => $email
+                //                             ,"count"    => $count
+                //                             ,"type"     => 4 
+                //                         );
+                // }
 
                 $this->emDebug("Gathering records that match criteria");
 

@@ -27,7 +27,7 @@
       "cron_description": "Cron uses the ScheduledCronTrait to ensure delivery at a specified time",
       "method": "startCron",
       "cron_frequency": "59",
-      "cron_max_run_time": "600"
+      "cron_max_run_time": "1200"
     }
   ],
 
