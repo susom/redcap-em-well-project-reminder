@@ -18,7 +18,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
     public function startCron() {
         $this->emDebug("Cron Args",func_get_args());
 
-        $start_times = array("11:30","13:30");
+        $start_times = array("11:30","14:15");
         $run_days    = array("sun","mon");
         $cron_freq = 3600; //weekly
 
