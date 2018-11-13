@@ -16,6 +16,8 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
      * This is the cron task specified in the config.json
      */
     public function startCron() {
+        $this->emDebug("Cron Args",func_get_args());
+
         $start_times = array("11:30");
         $run_days    = array("sun");
         $cron_freq = 3600; //weekly
@@ -281,8 +283,11 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
         // Get the current time (as a unix timestamp)
         $now_ts = time();
         $day    = strtolower(Date("D"));
-        
-        if(array_search($day,$run_days) > -1){
+
+        $this->emDebug("The days is " . $day);
+
+        if(array_search($day,$run_days) !== false){
+            $this->emDebug("the correct day : " . $day);
             foreach ($start_times as $start_time) {
                 // Convert our hour:minute value into a timestamp
                 $dt = new \DateTime($start_time);
@@ -292,12 +297,15 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                 $delta_min = ($now_ts-$start_time_ts) / 60;
                 $cron_freq_min = $cron_freq/60;
 
+                $this->emDebug("now : $now_ts , deltamin : $delta_min, cronfreqmin : $cron_freq_min" );
                 // To reduce database overhead, we will only check to see if we should run if we are between 0-2x the cron frequency
                 if ($delta_min >= 0 && $delta_min <= $cron_freq_min) {
 
                     // Let's see if we have already run this cron by looking up the last-run value
                     $last_cron_run_ts = $this->getSystemSetting($cron_status_key);
 
+                    $this->emDebug("delta time OK, last run $last_cron_run_ts");
+                    
                     // If the start of this cron zone is less than our last $start_time_ts, then we should run the cron job
                     if (empty($last_cron_run_ts) || $last_cron_run_ts < $start_time_ts) {
 
