@@ -18,8 +18,8 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
     public function startCron() {
         $this->emDebug("Cron Args",func_get_args());
 
-        $start_times = array("11:30");
-        $run_days    = array("sun");
+        $start_times = array("11:30","13:18","13:20","13:22","13:24","13:26","13:28","13:30");
+        $run_days    = array("sun","mon");
         $cron_freq = 3600; //weekly
 
         $this->emDebug("Starting Cron : Check if its in the right time range");
@@ -305,7 +305,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                     $last_cron_run_ts = $this->getSystemSetting($cron_status_key);
 
                     $this->emDebug("delta time OK, last run $last_cron_run_ts");
-                    
+
                     // If the start of this cron zone is less than our last $start_time_ts, then we should run the cron job
                     if (empty($last_cron_run_ts) || $last_cron_run_ts < $start_time_ts) {
 
