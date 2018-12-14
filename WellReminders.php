@@ -18,8 +18,8 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
     public function startCron() {
         $this->emDebug("Cron Args",func_get_args());
 
-        $start_times = array("11:30","14:15");
-        $run_days    = array("sun","mon");
+        $start_times = array("11:00");
+        $run_days    = array("sun");
         $cron_freq = 3600; //weekly
 
         $this->emDebug("Starting Cron : Check if its in the right time range");
@@ -172,11 +172,11 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                             ,'portal_email'
                                                             ,'email_reminders_count'
                                                             ,'well_score'
-                                                            ), array('enrollment_arm_1', 'short_anniversary_arm_1')
+                                                            ), array('enrollment_arm_1')
                                                             , null, false, true, false
                                                             , '[enrollment_arm_1][portal_consent_ts] >= "' . $anniversary_start . '" 
                                                             AND [enrollment_arm_1][portal_consent_ts] < "' . $anniversary_end . '" 
-                                                            AND [short_anniversary_arm_1][well_score] = "" 
+                                                            AND [short_anniversary_arm_1][well_score_long] = "" 
                                                             AND [enrollment_arm_1][portal_unsubscribe] != 1 
                                                             AND [enrollment_arm_1][user_test_data] != 1
                                                             AND [enrollment_arm_1][email_reminders_count] < 3'
@@ -211,9 +211,8 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                             ,'well_score'
                                                             ), array('enrollment_arm_1', 'anniversary_2_arm_1')
                                                             , null, false, true, false
-                                                            , '[enrollment_arm_1][portal_consent_ts] >= "' . $anniversary_start . '" 
-                                                            AND [enrollment_arm_1][portal_consent_ts] < "' . $anniversary_end . '" 
-                                                            AND [anniversary_2_arm_1][core_feedback] = "" 
+                                                            , '[enrollment_arm_1][portal_consent_ts] < "'.$anniversary_end." 
+                                                            AND [enrollment_arm_1][portal_consent_ts] != ""
                                                             AND [enrollment_arm_1][portal_unsubscribe] != 1 
                                                             AND [enrollment_arm_1][user_test_data] != 1
                                                             AND [enrollment_arm_1][email_reminders_count] < 3'
