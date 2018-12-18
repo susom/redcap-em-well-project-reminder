@@ -18,8 +18,8 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
     public function startCron() {
         $this->emDebug("Cron Args",func_get_args());
 
-        $start_times = array("11:00","12:00");
-        $run_days    = array("sun","tue");
+        $start_times = array("10:00");
+        $run_days    = array("sun");
         $cron_freq = 3600; //weekly
 
         $this->emDebug("Starting Cron : Check if its in the right time range");
