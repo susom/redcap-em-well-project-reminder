@@ -18,8 +18,8 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
     public function startCron() {
         $this->emDebug("Cron Args",func_get_args());
 
-        $start_times = array("11:00");
-        $run_days    = array("sun");
+        $start_times = array("11:00","12:00");
+        $run_days    = array("sun","tue");
         $cron_freq = 3600; //weekly
 
         $this->emDebug("Starting Cron : Check if its in the right time range");
@@ -27,12 +27,13 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
 
         echo "here is the useragent : $user_agent <br>";
 
-        if ($this->timeForCron(__FUNCTION__, $start_times, $cron_freq)  || strpos($user_agent,"Chrome") > -1) {
+        if ($this->timeForCron(__FUNCTION__, $start_times, $cron_freq, $run_days)  || strpos($user_agent,"Chrome") > -1) {
             // DO YOUR CRON TASK
             $this->emDebug("DoCron");
 
             $db_enabled = ExternalModules::getEnabledProjects($this->PREFIX);
             echo "start getting emails";
+
             $lastyear    = date("Y-m-d",strtotime("-1 year")); 
             $daily_count = array();
             while ($proj = db_fetch_assoc($db_enabled)) {
