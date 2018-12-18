@@ -212,7 +212,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                             ,'well_score'
                                                             ), array('enrollment_arm_1', 'anniversary_2_arm_1')
                                                             , null, false, true, false
-                                                            , '[enrollment_arm_1][portal_consent_ts] < "'.$anniversary_end." 
+                                                            , '[enrollment_arm_1][portal_consent_ts] < "'.$anniversary_end.'" 
                                                             AND [enrollment_arm_1][portal_consent_ts] != ""
                                                             AND [enrollment_arm_1][portal_unsubscribe] != 1 
                                                             AND [enrollment_arm_1][user_test_data] != 1
