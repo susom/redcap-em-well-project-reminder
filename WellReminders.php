@@ -239,7 +239,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                 $this->emDebug("Gathering records that match criteria");
 
                 // Export ALL data in ARRAY forma
-                $subject        = "Stanford WELL for Life wants to hear from you!";
+
                 $websiteName    = "WELL For Life";
                 $emailAddress   = "wellforlife@stanford.edu";
 
@@ -252,7 +252,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                     $count = $user["count"];
 
                     $email_msg  = prepareEmail($fname, $lname, $type);
-                    emailReminder($fname, $email, $email_msg, $subject);   
+                    emailReminder($fname, $email, $email_msg["body"], $email_msg["subject"]);
 
                     echo "An email was sent to $fname $lname ($email) ; $subject" . "<br>";
                     $this->emDebug("An email was sent to $fname $lname ($email) ; $subject" . "<br>");
@@ -265,6 +265,8 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                 $response       = REDCap::saveData($pid, 'json', $json_data, 'overwrite');
 
                 emailReminder("Julia Gustafson", "julia.gustafson@stanford.edu", "", count($send_emails) .  " Daily email reminders sent count");
+                emailReminder("Irvin Szeto", "irvins@stanford.edu", "", count($send_emails) .  " Daily email reminders sent count");
+            }
             }
         }
     }
@@ -331,23 +333,28 @@ function prepareEmail($fname, $lname, $type){
     $email_greeting_a[]     = "Below are some ways for you to get the most out of your Stanford WELL for Life experience:<br/>";
 
     $email_greeting_b       = array();
+    $subject                = "Stanford WELL for Life wants to hear from you!";
     switch($type){
         case 0:
-        $email_greeting_b[] = "Complete your WELL for Life registration: receive your custom well-being score after registering and completing the Stanford WELL for Life Scale!<br/>"; 
+        $email_greeting_b[] = "Receive your custom well-being score after registering and completing the Stanford WELL for Life Scale!<br/>";
+        $subject            = "Complete your WELL for Life registration";
         break;
 
         case 1:
         case 4:
-        $email_greeting_b[] = "Start the Stanford WELL for Life Scale: receive your custom well-being score after completing the Stanford WELL for Life Scale!"; 
+        $email_greeting_b[] = "Receive your custom well-being score after completing the Stanford WELL for Life Scale!";
+        $subject            = "Start the Stanford WELL for Life Scale";
         break;
 
         case 2:
-        $email_greeting_b[] = "Finish the Stanford WELL for Life Scale: receive your custom well-being score after completing the Stanford WELL for Life Scale!"; 
+        $email_greeting_b[] = "Receive your custom well-being score after completing the Stanford WELL for Life Scale!";
         $email_greeting_b[] = "Join our mini-challenge: can you improve your well-being by focusing on changing one area of well-being? Visit <a href='https://wellforlife-portal.stanford.edu/'>WELL for Life</a> website to find out what the current mini-challenge is!<br/>";
+        $subject            = "Finish the Stanford WELL for Life Scale";
         break;
 
         case 3:
-        $email_greeting_b[] = "Finish your Brief Stanford WELL for Life Scale: receive your custom well-being score after completing the Brief Stanford WELL for Life Scale!<br/>";
+        $email_greeting_b[] = "Receive your custom well-being score after completing the Stanford WELL for Life Scale!<br/>";
+        $subject            = "Finish the Stanford WELL for Life Scale";
         break;
     }
 
@@ -359,7 +366,8 @@ function prepareEmail($fname, $lname, $type){
     $email_greeting_z[]     = "<i style='font-size:77%;'>Participant rights: contact our IRB at 1-866-680-2906</i>";
  
     $email_greeting         = array_merge($email_greeting_a, $email_greeting_b, $email_greeting_z);
-    $email_msg              = implode("<br/>",$email_greeting);
+
+    $email_msg              = array("subject" => $subject, "body" => implode("<br/>",$email_greeting));
     return $email_msg;
 }
 
