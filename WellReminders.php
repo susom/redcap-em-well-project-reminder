@@ -267,7 +267,6 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                 emailReminder("Julia Gustafson", "julia.gustafson@stanford.edu", "", count($send_emails) .  " Daily email reminders sent count");
                 emailReminder("Irvin Szeto", "irvins@stanford.edu", "", count($send_emails) .  " Daily email reminders sent count");
             }
-            }
         }
     }
 
