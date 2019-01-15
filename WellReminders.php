@@ -72,6 +72,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                                 AND [portal_email_verified_ts] >= "'.$lastyear.'" 
                                                                 AND [portal_unsubscribe] != 1    
                                                                 AND [user_test_data] != 1   
+                                                                AND [portal_undeliverable_email] != 1   
                                                                 AND [email_reminders_count] < 3'
                                                             , true, true ); 
                 $daily_count[] =  "Consented_no_pw : ".count($consented_no_pw)."\r\n";
@@ -141,7 +142,8 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                                 AND [portal_consent_ts] >= "'.$lastyear.'"     
                                                                 AND [your_feedback_complete] != 2    
                                                                 AND [portal_unsubscribe] != 1    
-                                                                AND [user_test_data] != 1   
+                                                                AND [user_test_data] != 1
+                                                                AND [portal_undeliverable_email] != 1      
                                                                 AND [email_reminders_count] < 3'
                                                             , true, true ); 
                 $daily_count[] =   "Surveystart_nofinish : ".count($surveystart_nofinish)."\r\n";
@@ -162,79 +164,82 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                         );
                 }
 
+
+                //01/15/19 - Second & THIRD Year being sent from MAIL CHIMP Manaually
+
                 //√ SECOND YEAR, BUT BRIEF NOT STARTED COMPLETED
                 //use well_score because short survey is in different project
-                $anniversary_end    = date('Y-m-d', strtotime('-1 years'));
-                $anniversary_start  = date('Y-m-d', strtotime('-2 years'));
-                $brief_reminder     = REDCap::getData($pid,'array', null, array('id'
-                                                            ,'portal_consent_ts' //clicked on consent  + filled out password security qs
-                                                            ,'portal_firstname'
-                                                            ,'portal_lastname'
-                                                            ,'portal_email'
-                                                            ,'email_reminders_count'
-                                                            ,'well_score'
-                                                            ), array('enrollment_arm_1')
-                                                            , null, false, true, false
-                                                            , '[enrollment_arm_1][portal_consent_ts] >= "' . $anniversary_start . '" 
-                                                            AND [enrollment_arm_1][portal_consent_ts] < "' . $anniversary_end . '" 
-                                                            AND [short_anniversary_arm_1][well_score_long] = "" 
-                                                            AND [enrollment_arm_1][portal_unsubscribe] != 1 
-                                                            AND [enrollment_arm_1][user_test_data] != 1
-                                                            AND [enrollment_arm_1][email_reminders_count] < 3'
-                                                            , true, true ); 
-                $daily_count[] =  "Brief_reminder : ".count($brief_reminder)."\r\n";
-                foreach($brief_reminder as $user){
-                    $user               = array_shift($user);
-                    $uid                = $user["id"];
-                    $fname              = ucfirst($user["portal_firstname"]);
-                    $lname              = ucfirst($user["portal_lastname"]);
-                    $email              = $user["portal_email"];
-                    $count              = $user["email_reminders_count"];
-
-                    $send_emails[$uid]  = array(
-                                             "fname"    => $fname
-                                            ,"lname"    => $lname
-                                            ,"email"    => $email
-                                            ,"count"    => $count
-                                            ,"type"     => 3 
-                                        );
-                }
+//                $anniversary_end    = date('Y-m-d', strtotime('-1 years'));
+//                $anniversary_start  = date('Y-m-d', strtotime('-2 years'));
+//                $brief_reminder     = REDCap::getData($pid,'array', null, array('id'
+//                                                            ,'portal_consent_ts' //clicked on consent  + filled out password security qs
+//                                                            ,'portal_firstname'
+//                                                            ,'portal_lastname'
+//                                                            ,'portal_email'
+//                                                            ,'email_reminders_count'
+//                                                            ,'well_score'
+//                                                            ), array('enrollment_arm_1')
+//                                                            , null, false, true, false
+//                                                            , '[enrollment_arm_1][portal_consent_ts] >= "' . $anniversary_start . '"
+//                                                            AND [enrollment_arm_1][portal_consent_ts] < "' . $anniversary_end . '"
+//                                                            AND [short_anniversary_arm_1][well_score_long] = ""
+//                                                            AND [enrollment_arm_1][portal_unsubscribe] != 1
+//                                                            AND [enrollment_arm_1][user_test_data] != 1
+//                                                            AND [enrollment_arm_1][email_reminders_count] < 3'
+//                                                            , true, true );
+//                $daily_count[] =  "Brief_reminder : ".count($brief_reminder)."\r\n";
+//                foreach($brief_reminder as $user){
+//                    $user               = array_shift($user);
+//                    $uid                = $user["id"];
+//                    $fname              = ucfirst($user["portal_firstname"]);
+//                    $lname              = ucfirst($user["portal_lastname"]);
+//                    $email              = $user["portal_email"];
+//                    $count              = $user["email_reminders_count"];
+//
+//                    $send_emails[$uid]  = array(
+//                                             "fname"    => $fname
+//                                            ,"lname"    => $lname
+//                                            ,"email"    => $email
+//                                            ,"count"    => $count
+//                                            ,"type"     => 3
+//                                        );
+//                }
 
                 //√ THIRD ANNIVERSARY , NOT STARTED
-                $anniversary_end    = date('Y-m-d', strtotime('-2 years'));
-                $anniversary_start  = date('Y-m-d', strtotime('-3 years'));
-                $secondlong         = REDCap::getData($pid,'array', null, array('id'
-                                                            ,'portal_consent_ts' //clicked on consent  + filled out password security qs
-                                                            ,'portal_firstname'
-                                                            ,'portal_lastname'
-                                                            ,'portal_email'
-                                                            ,'email_reminders_count'
-                                                            ,'well_score'
-                                                            ), array('enrollment_arm_1', 'anniversary_2_arm_1')
-                                                            , null, false, true, false
-                                                            , '[enrollment_arm_1][portal_consent_ts] < "'.$anniversary_end.'" 
-                                                            AND [enrollment_arm_1][portal_consent_ts] != ""
-                                                            AND [enrollment_arm_1][portal_unsubscribe] != 1 
-                                                            AND [enrollment_arm_1][user_test_data] != 1
-                                                            AND [enrollment_arm_1][email_reminders_count] < 3'
-                                                            , true, true ); 
-                $daily_count[] =   "Secondlong : ".count($secondlong)."\r\n";
-                foreach($secondlong as $user){
-                    $user               = array_shift($user);
-                    $uid                = $user["id"];
-                    $fname              = ucfirst($user["portal_firstname"]);
-                    $lname              = ucfirst($user["portal_lastname"]);
-                    $email              = $user["portal_email"];
-                    $count              = $user["email_reminders_count"];
-
-                    $send_emails[$uid]  = array(
-                                             "fname"    => $fname
-                                            ,"lname"    => $lname
-                                            ,"email"    => $email
-                                            ,"count"    => $count
-                                            ,"type"     => 4 
-                                        );
-                }
+//                $anniversary_end    = date('Y-m-d', strtotime('-2 years'));
+//                $anniversary_start  = date('Y-m-d', strtotime('-3 years'));
+//                $secondlong         = REDCap::getData($pid,'array', null, array('id'
+//                                                            ,'portal_consent_ts' //clicked on consent  + filled out password security qs
+//                                                            ,'portal_firstname'
+//                                                            ,'portal_lastname'
+//                                                            ,'portal_email'
+//                                                            ,'email_reminders_count'
+//                                                            ,'well_score'
+//                                                            ), array('enrollment_arm_1', 'anniversary_2_arm_1')
+//                                                            , null, false, true, false
+//                                                            , '[enrollment_arm_1][portal_consent_ts] < "'.$anniversary_end.'"
+//                                                            AND [enrollment_arm_1][portal_consent_ts] != ""
+//                                                            AND [enrollment_arm_1][portal_unsubscribe] != 1
+//                                                            AND [enrollment_arm_1][user_test_data] != 1
+//                                                            AND [enrollment_arm_1][email_reminders_count] < 3'
+//                                                            , true, true );
+//                $daily_count[] =   "Secondlong : ".count($secondlong)."\r\n";
+//                foreach($secondlong as $user){
+//                    $user               = array_shift($user);
+//                    $uid                = $user["id"];
+//                    $fname              = ucfirst($user["portal_firstname"]);
+//                    $lname              = ucfirst($user["portal_lastname"]);
+//                    $email              = $user["portal_email"];
+//                    $count              = $user["email_reminders_count"];
+//
+//                    $send_emails[$uid]  = array(
+//                                             "fname"    => $fname
+//                                            ,"lname"    => $lname
+//                                            ,"email"    => $email
+//                                            ,"count"    => $count
+//                                            ,"type"     => 4
+//                                        );
+//                }
 
                 $this->emDebug("Gathering records that match criteria");
 
