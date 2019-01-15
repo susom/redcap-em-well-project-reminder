@@ -100,6 +100,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                             ,'portal_lastname'
                                                             ,'portal_email'
                                                             ,'email_reminders_count'
+                                                            ,'portal_email_act_token'
                                                             ), array('enrollment_arm_1')
                                                             , null, false, true, false
                                                             , '[portal_consent_ts] != ""    
@@ -118,13 +119,15 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                     $lname              = ucfirst($user["portal_lastname"]);
                     $email              = $user["portal_email"];
                     $count              = $user["email_reminders_count"];
+                    $code               = $user["portal_email_act_token"];
 
                     $send_emails[$uid]  = array(
                                              "fname"    => $fname
                                             ,"lname"    => $lname
                                             ,"email"    => $email
                                             ,"count"    => $count
-                                            ,"type"     => 1 
+                                            ,"type"     => 1
+                                            ,"code"     => $code
                                         );
                 }
 
@@ -136,6 +139,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                             ,'portal_lastname'
                                                             ,'portal_email'
                                                             ,'email_reminders_count'
+                                                            ,'portal_email_act_token'
                                                             ), array('enrollment_arm_1')
                                                             , null, false, true, false
                                                             , '[portal_consent_ts] != ""    
@@ -154,13 +158,15 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                     $lname              = ucfirst($user["portal_lastname"]);
                     $email              = $user["portal_email"];
                     $count              = $user["email_reminders_count"];
+                    $code               = $user["portal_email_act_token"];
 
                     $send_emails[$uid]  = array(
                                              "fname"    => $fname
                                             ,"lname"    => $lname
                                             ,"email"    => $email
                                             ,"count"    => $count
-                                            ,"type"     => 2 
+                                            ,"type"     => 2
+                                            ,"code"     => $code
                                         );
                 }
 
@@ -255,8 +261,9 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                     $email = $user["email"];
                     $type  = $user["type"];
                     $count = $user["count"];
+                    $code  = $user["code"];
 
-                    $email_msg  = prepareEmail($fname, $lname, $type);
+                    $email_msg  = prepareEmail($fname, $lname, $type,$code);
                     emailReminder($fname, $email, $email_msg["body"], $email_msg["subject"]);
 
                     echo "An email was sent to $fname $lname ($email) ; $subject" . "<br>";
@@ -331,29 +338,30 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
 
 }
 
-function prepareEmail($fname, $lname, $type){
+function prepareEmail($fname, $lname, $type, $ACTIVATION_CODE = NULL){
     $email_greeting_a       = array();
-    $email_greeting_a[]     = "Good morning, we miss you $fname!<br/>";
-    $email_greeting_a[]     = "Below are some ways for you to get the most out of your Stanford WELL for Life experience:<br/>";
+    $email_greeting_a[]     = "Good morning, $fname!<br/>";
+    $email_greeting_a[]     = "We noticed that is time for you to re-engage with where you left off with WELL for Life. Below are ways to get the most out of your experience:<br/>";
 
     $email_greeting_b       = array();
     $subject                = "Stanford WELL for Life wants to hear from you!";
     switch($type){
         case 0:
-        $email_greeting_b[] = "Receive your custom well-being score after registering and completing the Stanford WELL for Life Scale!<br/>";
+        $email_greeting_b[] = "Complete your WELL for Life registration: receive your custom well-being score after registering and completing the Stanford WELL for Life Survey! <br/>";
+        $email_greeting_b[] = "Follow the link to continue your registration: <a href='https://wellforlife-portal.stanford.edu/register.php?activation=".$ACTIVATION_CODE."'></a>";
         $subject            = "Complete your WELL for Life registration";
         break;
 
         case 1:
         case 4:
-        $email_greeting_b[] = "Receive your custom well-being score after completing the Stanford WELL for Life Scale!";
-        $subject            = "Start the Stanford WELL for Life Scale";
+        $email_greeting_b[] = "Start the Stanford WELL for Life Survey: receive your custom well-being score upon completion! <a href='https://wellforlife-portal.stanford.edu'>Login</a> to start.";
+        $subject            = "Start the Stanford WELL for Life Survey";
         break;
 
         case 2:
-        $email_greeting_b[] = "Receive your custom well-being score after completing the Stanford WELL for Life Scale!";
-        $email_greeting_b[] = "Join our mini-challenge: can you improve your well-being by focusing on changing one area of well-being? Visit <a href='https://wellforlife-portal.stanford.edu/'>WELL for Life</a> website to find out what the current mini-challenge is!<br/>";
-        $subject            = "Finish the Stanford WELL for Life Scale";
+        $email_greeting_b[] = "Finish the Stanford WELL for Life Survey: receive your custom well-being score upon completion! <a href='https://wellforlife-portal.stanford.edu'>Login</a> to finish.";
+//        $email_greeting_b[] = "Join our mini-challenge: can you improve your well-being by focusing on changing one area of well-being? Visit <a href='https://wellforlife-portal.stanford.edu/'>WELL for Life</a> website to find out what the current mini-challenge is!<br/>";
+        $subject            = "Finish the Stanford WELL for Life Survey";
         break;
 
         case 3:
@@ -363,9 +371,9 @@ function prepareEmail($fname, $lname, $type){
     }
 
     $email_greeting_z       = array();
-    $email_greeting_z[]     = "For resources and other ways to get involved, <a href='https://wellforlife-portal.stanford.edu/'>login</a> to the portal to check out the newsfeed and follow us on <a href='https://www.facebook.com/wellforlifeatstanford/'>Facebook</a>, <a href='https://www.instagram.com/well_for_life/'>Instagram</a> and <a href='https://twitter.com/well_for_life'>Twitter</a>!<br/>";
+    $email_greeting_z[]     = "For resources and other ways to get involved, visit our <a href='http://wellforlife.stanford.edu'>website</a> or </a><a href='https://wellforlife-portal.stanford.edu/'>login</a> to the portal to check out the WELL for Life newsfeed.  You can follow us on <a href='https://www.facebook.com/wellforlifeatstanford/'>Facebook</a>, <a href='https://www.instagram.com/well_for_life/'>Instagram</a> and <a href='https://twitter.com/well_for_life'>Twitter</a>!<br/>";
     $email_greeting_z[]     = "For questions, comments, concerns, or to unsubscribe please email: <a href='mailto:wellforlife@stanford.edu'>wellforlife@stanford.edu</a> <br/>";
-    $email_greeting_z[]     = "Cheers!";
+    $email_greeting_z[]     = "Sincerely,";
     $email_greeting_z[]     = "The WELL for Life Team";
     $email_greeting_z[]     = "<i style='font-size:77%;'>Participant rights: contact our IRB at 1-866-680-2906</i>";
  
