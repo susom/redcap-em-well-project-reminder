@@ -18,8 +18,8 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
     public function startCron() {
         $this->emDebug("Cron Args",func_get_args());
 
-        $start_times = array("11:30","14:15");
-        $run_days    = array("sun","mon");
+        $start_times = array("10:00");
+        $run_days    = array("sun");
         $cron_freq = 3600; //weekly
 
         $this->emDebug("Starting Cron : Check if its in the right time range");
@@ -27,12 +27,13 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
 
         echo "here is the useragent : $user_agent <br>";
 
-        if ($this->timeForCron(__FUNCTION__, $start_times, $cron_freq)  || strpos($user_agent,"Chrome") > -1) {
+        if ($this->timeForCron(__FUNCTION__, $start_times, $cron_freq, $run_days)  || strpos($user_agent,"Chrome") > -1) {
             // DO YOUR CRON TASK
             $this->emDebug("DoCron");
 
             $db_enabled = ExternalModules::getEnabledProjects($this->PREFIX);
             echo "start getting emails";
+
             $lastyear    = date("Y-m-d",strtotime("-1 year")); 
             $daily_count = array();
             while ($proj = db_fetch_assoc($db_enabled)) {
@@ -71,6 +72,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                                 AND [portal_email_verified_ts] >= "'.$lastyear.'" 
                                                                 AND [portal_unsubscribe] != 1    
                                                                 AND [user_test_data] != 1   
+                                                                AND [portal_undeliverable_email] != 1   
                                                                 AND [email_reminders_count] < 3'
                                                             , true, true ); 
                 $daily_count[] =  "Consented_no_pw : ".count($consented_no_pw)."\r\n";
@@ -98,6 +100,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                             ,'portal_lastname'
                                                             ,'portal_email'
                                                             ,'email_reminders_count'
+                                                            ,'portal_email_act_token'
                                                             ), array('enrollment_arm_1')
                                                             , null, false, true, false
                                                             , '[portal_consent_ts] != ""    
@@ -116,13 +119,15 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                     $lname              = ucfirst($user["portal_lastname"]);
                     $email              = $user["portal_email"];
                     $count              = $user["email_reminders_count"];
+                    $code               = $user["portal_email_act_token"];
 
                     $send_emails[$uid]  = array(
                                              "fname"    => $fname
                                             ,"lname"    => $lname
                                             ,"email"    => $email
                                             ,"count"    => $count
-                                            ,"type"     => 1 
+                                            ,"type"     => 1
+                                            ,"code"     => $code
                                         );
                 }
 
@@ -134,13 +139,15 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                                                             ,'portal_lastname'
                                                             ,'portal_email'
                                                             ,'email_reminders_count'
+                                                            ,'portal_email_act_token'
                                                             ), array('enrollment_arm_1')
                                                             , null, false, true, false
                                                             , '[portal_consent_ts] != ""    
                                                                 AND [portal_consent_ts] >= "'.$lastyear.'"     
                                                                 AND [your_feedback_complete] != 2    
                                                                 AND [portal_unsubscribe] != 1    
-                                                                AND [user_test_data] != 1   
+                                                                AND [user_test_data] != 1
+                                                                AND [portal_undeliverable_email] != 1      
                                                                 AND [email_reminders_count] < 3'
                                                             , true, true ); 
                 $daily_count[] =   "Surveystart_nofinish : ".count($surveystart_nofinish)."\r\n";
@@ -151,95 +158,99 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                     $lname              = ucfirst($user["portal_lastname"]);
                     $email              = $user["portal_email"];
                     $count              = $user["email_reminders_count"];
+                    $code               = $user["portal_email_act_token"];
 
                     $send_emails[$uid]  = array(
                                              "fname"    => $fname
                                             ,"lname"    => $lname
                                             ,"email"    => $email
                                             ,"count"    => $count
-                                            ,"type"     => 2 
+                                            ,"type"     => 2
+                                            ,"code"     => $code
                                         );
                 }
+
+
+                //01/15/19 - Second & THIRD Year being sent from MAIL CHIMP Manaually
 
                 //√ SECOND YEAR, BUT BRIEF NOT STARTED COMPLETED
                 //use well_score because short survey is in different project
-                $anniversary_end    = date('Y-m-d', strtotime('-1 years'));
-                $anniversary_start  = date('Y-m-d', strtotime('-2 years'));
-                $brief_reminder     = REDCap::getData($pid,'array', null, array('id'
-                                                            ,'portal_consent_ts' //clicked on consent  + filled out password security qs
-                                                            ,'portal_firstname'
-                                                            ,'portal_lastname'
-                                                            ,'portal_email'
-                                                            ,'email_reminders_count'
-                                                            ,'well_score'
-                                                            ), array('enrollment_arm_1', 'short_anniversary_arm_1')
-                                                            , null, false, true, false
-                                                            , '[enrollment_arm_1][portal_consent_ts] >= "' . $anniversary_start . '" 
-                                                            AND [enrollment_arm_1][portal_consent_ts] < "' . $anniversary_end . '" 
-                                                            AND [short_anniversary_arm_1][well_score] = "" 
-                                                            AND [enrollment_arm_1][portal_unsubscribe] != 1 
-                                                            AND [enrollment_arm_1][user_test_data] != 1
-                                                            AND [enrollment_arm_1][email_reminders_count] < 3'
-                                                            , true, true ); 
-                $daily_count[] =  "Brief_reminder : ".count($brief_reminder)."\r\n";
-                foreach($brief_reminder as $user){
-                    $user               = array_shift($user);
-                    $uid                = $user["id"];
-                    $fname              = ucfirst($user["portal_firstname"]);
-                    $lname              = ucfirst($user["portal_lastname"]);
-                    $email              = $user["portal_email"];
-                    $count              = $user["email_reminders_count"];
-
-                    $send_emails[$uid]  = array(
-                                             "fname"    => $fname
-                                            ,"lname"    => $lname
-                                            ,"email"    => $email
-                                            ,"count"    => $count
-                                            ,"type"     => 3 
-                                        );
-                }
+//                $anniversary_end    = date('Y-m-d', strtotime('-1 years'));
+//                $anniversary_start  = date('Y-m-d', strtotime('-2 years'));
+//                $brief_reminder     = REDCap::getData($pid,'array', null, array('id'
+//                                                            ,'portal_consent_ts' //clicked on consent  + filled out password security qs
+//                                                            ,'portal_firstname'
+//                                                            ,'portal_lastname'
+//                                                            ,'portal_email'
+//                                                            ,'email_reminders_count'
+//                                                            ,'well_score'
+//                                                            ), array('enrollment_arm_1')
+//                                                            , null, false, true, false
+//                                                            , '[enrollment_arm_1][portal_consent_ts] >= "' . $anniversary_start . '"
+//                                                            AND [enrollment_arm_1][portal_consent_ts] < "' . $anniversary_end . '"
+//                                                            AND [short_anniversary_arm_1][well_score_long] = ""
+//                                                            AND [enrollment_arm_1][portal_unsubscribe] != 1
+//                                                            AND [enrollment_arm_1][user_test_data] != 1
+//                                                            AND [enrollment_arm_1][email_reminders_count] < 3'
+//                                                            , true, true );
+//                $daily_count[] =  "Brief_reminder : ".count($brief_reminder)."\r\n";
+//                foreach($brief_reminder as $user){
+//                    $user               = array_shift($user);
+//                    $uid                = $user["id"];
+//                    $fname              = ucfirst($user["portal_firstname"]);
+//                    $lname              = ucfirst($user["portal_lastname"]);
+//                    $email              = $user["portal_email"];
+//                    $count              = $user["email_reminders_count"];
+//
+//                    $send_emails[$uid]  = array(
+//                                             "fname"    => $fname
+//                                            ,"lname"    => $lname
+//                                            ,"email"    => $email
+//                                            ,"count"    => $count
+//                                            ,"type"     => 3
+//                                        );
+//                }
 
                 //√ THIRD ANNIVERSARY , NOT STARTED
-                $anniversary_end    = date('Y-m-d', strtotime('-2 years'));
-                $anniversary_start  = date('Y-m-d', strtotime('-3 years'));
-                $secondlong         = REDCap::getData($pid,'array', null, array('id'
-                                                            ,'portal_consent_ts' //clicked on consent  + filled out password security qs
-                                                            ,'portal_firstname'
-                                                            ,'portal_lastname'
-                                                            ,'portal_email'
-                                                            ,'email_reminders_count'
-                                                            ,'well_score'
-                                                            ), array('enrollment_arm_1', 'anniversary_2_arm_1')
-                                                            , null, false, true, false
-                                                            , '[enrollment_arm_1][portal_consent_ts] >= "' . $anniversary_start . '" 
-                                                            AND [enrollment_arm_1][portal_consent_ts] < "' . $anniversary_end . '" 
-                                                            AND [anniversary_2_arm_1][core_feedback] = "" 
-                                                            AND [enrollment_arm_1][portal_unsubscribe] != 1 
-                                                            AND [enrollment_arm_1][user_test_data] != 1
-                                                            AND [enrollment_arm_1][email_reminders_count] < 3'
-                                                            , true, true ); 
-                $daily_count[] =   "Secondlong : ".count($secondlong)."\r\n";
-                foreach($secondlong as $user){
-                    $user               = array_shift($user);
-                    $uid                = $user["id"];
-                    $fname              = ucfirst($user["portal_firstname"]);
-                    $lname              = ucfirst($user["portal_lastname"]);
-                    $email              = $user["portal_email"];
-                    $count              = $user["email_reminders_count"];
-
-                    $send_emails[$uid]  = array(
-                                             "fname"    => $fname
-                                            ,"lname"    => $lname
-                                            ,"email"    => $email
-                                            ,"count"    => $count
-                                            ,"type"     => 4 
-                                        );
-                }
+//                $anniversary_end    = date('Y-m-d', strtotime('-2 years'));
+//                $anniversary_start  = date('Y-m-d', strtotime('-3 years'));
+//                $secondlong         = REDCap::getData($pid,'array', null, array('id'
+//                                                            ,'portal_consent_ts' //clicked on consent  + filled out password security qs
+//                                                            ,'portal_firstname'
+//                                                            ,'portal_lastname'
+//                                                            ,'portal_email'
+//                                                            ,'email_reminders_count'
+//                                                            ,'well_score'
+//                                                            ), array('enrollment_arm_1', 'anniversary_2_arm_1')
+//                                                            , null, false, true, false
+//                                                            , '[enrollment_arm_1][portal_consent_ts] < "'.$anniversary_end.'"
+//                                                            AND [enrollment_arm_1][portal_consent_ts] != ""
+//                                                            AND [enrollment_arm_1][portal_unsubscribe] != 1
+//                                                            AND [enrollment_arm_1][user_test_data] != 1
+//                                                            AND [enrollment_arm_1][email_reminders_count] < 3'
+//                                                            , true, true );
+//                $daily_count[] =   "Secondlong : ".count($secondlong)."\r\n";
+//                foreach($secondlong as $user){
+//                    $user               = array_shift($user);
+//                    $uid                = $user["id"];
+//                    $fname              = ucfirst($user["portal_firstname"]);
+//                    $lname              = ucfirst($user["portal_lastname"]);
+//                    $email              = $user["portal_email"];
+//                    $count              = $user["email_reminders_count"];
+//
+//                    $send_emails[$uid]  = array(
+//                                             "fname"    => $fname
+//                                            ,"lname"    => $lname
+//                                            ,"email"    => $email
+//                                            ,"count"    => $count
+//                                            ,"type"     => 4
+//                                        );
+//                }
 
                 $this->emDebug("Gathering records that match criteria");
 
                 // Export ALL data in ARRAY forma
-                $subject        = "Stanford WELL for Life wants to hear from you!";
+
                 $websiteName    = "WELL For Life";
                 $emailAddress   = "wellforlife@stanford.edu";
 
@@ -250,9 +261,10 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                     $email = $user["email"];
                     $type  = $user["type"];
                     $count = $user["count"];
+                    $code  = $user["code"];
 
-                    $email_msg  = prepareEmail($fname, $lname, $type);
-                    emailReminder($fname, $email, $email_msg, $subject);   
+                    $email_msg  = prepareEmail($fname, $lname, $type,$code);
+                    emailReminder($fname, $email, $email_msg["body"], $email_msg["subject"]);
 
                     echo "An email was sent to $fname $lname ($email) ; $subject" . "<br>";
                     $this->emDebug("An email was sent to $fname $lname ($email) ; $subject" . "<br>");
@@ -264,7 +276,8 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                 $json_data      = json_encode($update_reminder_count);
                 $response       = REDCap::saveData($pid, 'json', $json_data, 'overwrite');
 
-                emailReminder("Julia Gustafson", "julia.gustafson@stanford.edu", "", "Daily email sent count");
+                emailReminder("Julia Gustafson", "julia.gustafson@stanford.edu", "", count($send_emails) .  " Daily email reminders sent count");
+                emailReminder("Irvin Szeto", "irvins@stanford.edu", "", count($send_emails) .  " Daily email reminders sent count");
             }
         }
     }
@@ -325,41 +338,48 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
 
 }
 
-function prepareEmail($fname, $lname, $type){
+function prepareEmail($fname, $lname, $type, $ACTIVATION_CODE = NULL){
     $email_greeting_a       = array();
-    $email_greeting_a[]     = "Good morning, we miss you $fname!<br/>";
-    $email_greeting_a[]     = "Below are some ways for you to get the most out of your Stanford WELL for Life experience:<br/>";
+    $email_greeting_a[]     = "Good morning, $fname!<br/>";
+    $email_greeting_a[]     = "We noticed that is time for you to re-engage with where you left off with WELL for Life. Below are ways to get the most out of your experience:<br/>";
 
     $email_greeting_b       = array();
+    $subject                = "Stanford WELL for Life wants to hear from you!";
     switch($type){
         case 0:
-        $email_greeting_b[] = "Complete your WELL for Life registration: receive your custom well-being score after registering and completing the Stanford WELL for Life Scale!<br/>"; 
+        $email_greeting_b[] = "Complete your WELL for Life registration: receive your custom well-being score after registering and completing the Stanford WELL for Life Survey! <br/>";
+        $email_greeting_b[] = "Follow the link to continue your registration: <a href='https://wellforlife-portal.stanford.edu/register.php?activation=".$ACTIVATION_CODE."'></a>";
+        $subject            = "Complete your WELL for Life registration";
         break;
 
         case 1:
         case 4:
-        $email_greeting_b[] = "Start the Stanford WELL for Life Scale: receive your custom well-being score after completing the Stanford WELL for Life Scale!"; 
+        $email_greeting_b[] = "Start the Stanford WELL for Life Survey: receive your custom well-being score upon completion! <a href='https://wellforlife-portal.stanford.edu'>Login</a> to start.";
+        $subject            = "Start the Stanford WELL for Life Survey";
         break;
 
         case 2:
-        $email_greeting_b[] = "Finish the Stanford WELL for Life Scale: receive your custom well-being score after completing the Stanford WELL for Life Scale!"; 
-        $email_greeting_b[] = "Join our mini-challenge: can you improve your well-being by focusing on changing one area of well-being? Visit <a href='https://wellforlife-portal.stanford.edu/'>WELL for Life</a> website to find out what the current mini-challenge is!<br/>";
+        $email_greeting_b[] = "Finish the Stanford WELL for Life Survey: receive your custom well-being score upon completion! <a href='https://wellforlife-portal.stanford.edu'>Login</a> to finish.";
+//        $email_greeting_b[] = "Join our mini-challenge: can you improve your well-being by focusing on changing one area of well-being? Visit <a href='https://wellforlife-portal.stanford.edu/'>WELL for Life</a> website to find out what the current mini-challenge is!<br/>";
+        $subject            = "Finish the Stanford WELL for Life Survey";
         break;
 
         case 3:
-        $email_greeting_b[] = "Finish your Brief Stanford WELL for Life Scale: receive your custom well-being score after completing the Brief Stanford WELL for Life Scale!<br/>";
+        $email_greeting_b[] = "Receive your custom well-being score after completing the Stanford WELL for Life Scale!<br/>";
+        $subject            = "Finish the Stanford WELL for Life Scale";
         break;
     }
 
     $email_greeting_z       = array();
-    $email_greeting_z[]     = "For resources and other ways to get involved, <a href='https://wellforlife-portal.stanford.edu/'>login</a> to the portal to check out the newsfeed and follow us on <a href='https://www.facebook.com/wellforlifeatstanford/'>Facebook</a>, <a href='https://www.instagram.com/well_for_life/'>Instagram</a> and <a href='https://twitter.com/well_for_life'>Twitter</a>!<br/>";
+    $email_greeting_z[]     = "For resources and other ways to get involved, visit our <a href='http://wellforlife.stanford.edu'>website</a> or </a><a href='https://wellforlife-portal.stanford.edu/'>login</a> to the portal to check out the WELL for Life newsfeed.  You can follow us on <a href='https://www.facebook.com/wellforlifeatstanford/'>Facebook</a>, <a href='https://www.instagram.com/well_for_life/'>Instagram</a> and <a href='https://twitter.com/well_for_life'>Twitter</a>!<br/>";
     $email_greeting_z[]     = "For questions, comments, concerns, or to unsubscribe please email: <a href='mailto:wellforlife@stanford.edu'>wellforlife@stanford.edu</a> <br/>";
-    $email_greeting_z[]     = "Cheers!";
+    $email_greeting_z[]     = "Sincerely,";
     $email_greeting_z[]     = "The WELL for Life Team";
     $email_greeting_z[]     = "<i style='font-size:77%;'>Participant rights: contact our IRB at 1-866-680-2906</i>";
  
     $email_greeting         = array_merge($email_greeting_a, $email_greeting_b, $email_greeting_z);
-    $email_msg              = implode("<br/>",$email_greeting);
+
+    $email_msg              = array("subject" => $subject, "body" => implode("<br/>",$email_greeting));
     return $email_msg;
 }
 
