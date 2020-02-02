@@ -36,7 +36,8 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
 
             $lastyear    = date("Y-m-d",strtotime("-1 year")); 
             $daily_count = array();
-            while ($proj = db_fetch_assoc($db_enabled)) {
+            //while ($proj = db_fetch_assoc($db_enabled)) {
+            while($proj = $db_enabled->fetch_assoc()){
                 $pid = $proj_id = $project_id = $proj['project_id'];
                 $this->emDebug("Processing " . $pid);
 
