@@ -277,7 +277,7 @@ class WellReminders extends \ExternalModules\AbstractExternalModule
                 $json_data      = json_encode($update_reminder_count);
                 $response       = REDCap::saveData($pid, 'json', $json_data, 'overwrite');
 
-                emailReminder("Julia Gustafson", "julia.gustafson@stanford.edu", "", count($send_emails) .  " Daily email reminders sent count");
+                emailReminder("Katy Peng", "katypeng@stanford.edu", "", count($send_emails) .  " Daily email reminders sent count");
                 emailReminder("Irvin Szeto", "irvins@stanford.edu", "", count($send_emails) .  " Daily email reminders sent count");
             }
         }
